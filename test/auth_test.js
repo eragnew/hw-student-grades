@@ -26,6 +26,12 @@ describe('http basic', function() {
 });
 
 describe('auth', function() {
+  before(function(done) {
+    User.remove({}, function() {
+      done();
+    });
+  });
+
   after(function(done) {
     mongoose.connection.db.dropDatabase(function() {
       done();

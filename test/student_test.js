@@ -117,60 +117,58 @@ describe('the student resource', function() {
         });
     });
   });
-});
 
-describe('the subjects resource', function() {
-  before(function(done) {
-    chai.request(url)
-      .post('/students')
-      .send({
-        name: 'Jane Eightpack',
-        subject: 'English',
-        grade: 3,
-        token: token
-      })
-      .end();
-    chai.request(url)
-      .post('/students')
-      .send({
-        name: 'Joe Sixpack',
-        subject: 'History',
-        grade: 4,
-        token: token
-      })
-      .end();
-    chai.request(url)
-      .post('/students')
-      .send({
-        name: 'Frank Ninepack',
-        subject: 'Math',
-        grade: 2,
-        token: token
-      })
-      .end(function(err, res) {
-        done();
+  describe('the subjects resource', function() {
+    before(function(done) {
+      Student.remove({}, function(err) {
+        if (err) return console.log(err);
       });
-  });
+      chai.request(url)
+        .post('/students')
+        .send({
+          name: 'Jane Eightpack',
+          subject: 'English',
+          grade: 3,
+          token: token
+        })
+        .end();
+      chai.request(url)
+        .post('/students')
+        .send({
+          name: 'Joe Sixpack',
+          subject: 'History',
+          grade: 4,
+          token: token
+        })
+        .end();
+      chai.request(url)
+        .post('/students')
+        .send({
+          name: 'Frank Ninepack',
+          subject: 'Math',
+          grade: 2,
+          token: token
+        })
+        .end(function(err, res) {
+          done();
+        });
+    });
 
-  after(function(done) {
-    mongoose.connection.db.dropDatabase(function(err) {
-      if (err) throw err;
-      done();
+    it('should return a list of distinct subjects', function(done) {
+      chai.request(url)
+        .get('/subjects')
+        .end(function(err, res) {
+          debugger;
+          expect(err).to.eql(null);
+          expect(Array.isArray(res.body)).to.eql(true);
+          expect(res.body).to.have.members(['English', 'History', 'Math']);
+          done();
+        });
     });
   });
-
-  it('should return a list of distinct subjects', function(done) {
-    chai.request(url)
-      .get('/subjects')
-      .end(function(err, res) {
-        expect(err).to.eql(null);
-        expect(Array.isArray(res.body)).to.eql(true);
-        //expect(res.body).to.eql(['English', 'History', 'Math']);
-        expect(res.body).to.have.members(['English', 'History', 'Math']);
-        done();
-      });
-  });
 });
+
+
 
 
 
