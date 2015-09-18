@@ -4,6 +4,7 @@ var jsonParser = require('body-parser').json();
 var handleError = require(__dirname + '/../lib/handle_error');
 var httpBasic = require(__dirname + '/../lib/http_basic');
 
+var userRef;
 var usersRouter = module.exports = exports = express.Router();
 
 usersRouter.post('/signup', jsonParser, function(req, res) {
@@ -34,14 +35,15 @@ usersRouter.get('/signin', httpBasic, function(req, res) {
       return res.status(401).json({msg: 'could not authenticate'});
     }
     user.compareHash(req.auth.password, handleCompareHash);
-    function handleCompareHash(err, hashRes) {
-      if (err) return handleError(err, res);
-      if (!hashRes) {
-        console.log('could not authenticate: ' + req.auth.username);
-        return res.status(401).json({msg: 'could not authenticate'});
-      }
-      user.generateToken(handleSigninToken);
+    userRef = user;
+  }
+  function handleCompareHash(err, hashRes) {
+    if (err) return handleError(err, res);
+    if (!hashRes) {
+      console.log('could not authenticate: ' + req.auth.username);
+      return res.status(401).json({msg: 'could not authenticate'});
     }
+    userRef.generateToken(handleSigninToken);
   }
   function handleSigninToken(err, token) {
     if (err) return handleError(err, res);
