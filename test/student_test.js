@@ -9,8 +9,21 @@ require(__dirname + '/../server');
 var mongoose = require('mongoose');
 var url = 'localhost:3000/api';
 var Student = require(__dirname + '/../models/student');
+var User = require(__dirname + '/../models/user');
+
+var token = '';
 
 describe('the student resource', function() {
+  before(function(done) {
+    chai.request(url)
+      .post('/signup')
+      .send({username: 'test', password: 'foobar123'})
+      .end(function(err, res) {
+        token = res.body.token;
+        done();
+      });
+  });
+
   after(function(done) {
     mongoose.connection.db.dropDatabase(function(err) {
       if (err) throw err;
@@ -34,7 +47,8 @@ describe('the student resource', function() {
       .send({
         name: 'Joe Sixpack',
         subject: 'Math',
-        grade: 3.5
+        grade: 3.5,
+        token: token
       })
       .end(function(err, res) {
         expect(err).to.eql(null);
@@ -51,7 +65,8 @@ describe('the student resource', function() {
       .send({
         name: 'Jane Eightpack',
         subject: 'English',
-        grade: 5
+        grade: 5,
+        token: token
       })
       .end(function(err, res) {
         expect(res).to.have.status(500);
@@ -65,7 +80,8 @@ describe('the student resource', function() {
       var testStudent = new Student({
         name: 'Joe',
         subject: 'History',
-        grade: 2.33
+        grade: 2.33,
+        username: 'test'
       });
       testStudent.save(function(err, data) {
         if (err) throw err;
@@ -80,7 +96,8 @@ describe('the student resource', function() {
         .send({
           name: 'Joe Sixpack',
           subject: 'Art',
-          grade: 3.33
+          grade: 3.33,
+          token: token
         })
         .end(function(err, res) {
           expect(err).to.eql(null);
@@ -92,6 +109,7 @@ describe('the student resource', function() {
     it('should be able to delete a student document', function(done) {
       chai.request(url)
         .delete('/students/' + this.testStudent._id)
+        .send({token: token})
         .end(function(err, res) {
           expect(err).to.eql(null);
           expect(res.body.msg).to.eql('success');
@@ -108,7 +126,8 @@ describe('the subjects resource', function() {
       .send({
         name: 'Jane Eightpack',
         subject: 'English',
-        grade: 3
+        grade: 3,
+        token: token
       })
       .end();
     chai.request(url)
@@ -116,7 +135,8 @@ describe('the subjects resource', function() {
       .send({
         name: 'Joe Sixpack',
         subject: 'History',
-        grade: 4
+        grade: 4,
+        token: token
       })
       .end();
     chai.request(url)
@@ -124,7 +144,8 @@ describe('the subjects resource', function() {
       .send({
         name: 'Frank Ninepack',
         subject: 'Math',
-        grade: 2
+        grade: 2,
+        token: token
       })
       .end(function(err, res) {
         done();
@@ -144,7 +165,8 @@ describe('the subjects resource', function() {
       .end(function(err, res) {
         expect(err).to.eql(null);
         expect(Array.isArray(res.body)).to.eql(true);
-        expect(res.body).to.eql(['English', 'History', 'Math']);
+        //expect(res.body).to.eql(['English', 'History', 'Math']);
+        expect(res.body).to.have.members(['English', 'History', 'Math']);
         done();
       });
   });

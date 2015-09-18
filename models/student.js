@@ -7,7 +7,8 @@ var studentSchema = new mongoose.Schema({
     type: Number,
     min: 0,
     max: 4
-  }
+  },
+  username: String
 });
 
 module.exports = mongoose.model('Student', studentSchema);
