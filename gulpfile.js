@@ -16,6 +16,11 @@ gulp.task('staticfiles:dev', function() {
     .pipe(gulp.dest('build/'));
 });
 
+var watcher = gulp.watch('app/js/**/*.js', ['build:dev']);
+watcher.on('change', function(event) {
+  console.log(event.path + ' was ' + event.type + ', running tasks...');
+});
+
 gulp.task('build:dev', ['staticfiles:dev', 'webpack:dev']);
 gulp.task('default', ['build:dev']);
 
